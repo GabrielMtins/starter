@@ -98,9 +98,7 @@ bool Shader_SetUniform4f(const Shader *shader, const char *name, float x, float 
 	if(location < 0)
 		return false;
 
-	glUseProgram(shader->id);
-	glUniform4f(location, x, y, z, w);
-
+	glUseProgram(shader->id); glUniform4f(location, x, y, z, w);
 	return true;
 }
 
