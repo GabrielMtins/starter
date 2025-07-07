@@ -125,6 +125,13 @@ bool TextureArray_Load(TextureArray *texture_array, const char *filename) {
 	return true;
 }
 
+bool TextureArray_Use(TextureArray *texture_array, int unit) {
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture_array->texture_id);
+	
+	return true;
+}
+
 bool MegaTexture_Load(MegaTexture *mega_texture, const char *filename) {
 
 	if(!loaded) {

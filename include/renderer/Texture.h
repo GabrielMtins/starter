@@ -32,6 +32,8 @@ bool TextureArray_Create(TextureArray *texture_array, int w, int h);
 
 bool TextureArray_Load(TextureArray *texture_array, const char *filename);
 
+bool TextureArray_Use(TextureArray *texture_array, int unit);
+
 bool MegaTexture_Load(MegaTexture *mega_texture, const char *filename);
 
 bool MegaTexture_Destroy(MegaTexture *mega_texture);

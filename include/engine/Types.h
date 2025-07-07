@@ -7,9 +7,11 @@
 
 typedef struct {
 	float bot_height;
+	int bot_window_texture;
 	int bot_texture;
 
 	float top_height;
+	int top_window_texture;
 	int top_texture;
 
 	bool has_wall;
