@@ -40,8 +40,8 @@ bool Builder_BuildMesh(Mesh *mesh, Memory *stack, const World *world) {
 		used / sizeof(unsigned int)
 	};
 
-	for(int i = 0; i < WORLD_SIZE; i++) {
-		for(int j = 0; j < WORLD_SIZE; j++) {
+	for(int i = 0; i < 4; i++) {
+		for(int j = 0; j < 4; j++) {
 			Builder_BuildTile(&context, world, i, j);
 		}
 	}

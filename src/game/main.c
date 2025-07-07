@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
 
 	Memory memory, stack;
 	Context *context;
-	MegaTexture mega_texture;
 	TextureArray texture_array;
 	Texture texture;
 	Shader shader;
@@ -63,18 +62,19 @@ int main(int argc, char **argv) {
 
 	Builder_BuildMesh(&mesh, context->stack, world);
 
+
 	Shader_Load(&shader,
 			Memory_ReadFileAsString(&memory, "res/shaders/octree.vs"),
 			Memory_ReadFileAsString(&memory, "res/shaders/octree.fs")
 			);
 	Memory_Free(context->stack);
 
-	MegaTexture_Load(&mega_texture, "floor.png");
+	Texture_Load(&texture, "floor.png", 64, 64);
+
 	TextureArray_Create(&texture_array, 64, 64);
 	TextureArray_Load(&texture_array, "floor.png");
 	TextureArray_Load(&texture_array, "wall.png");
 
-	Texture_Create(&texture, &mega_texture, 0, 0, 64, 64, 32, 32);
 	Context_SetFps(context, 165);
 
 	while(!context->quit) {
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 		Mat4_Mul(&model, &model, &transform);
 		Shader_SetUniformMat4(&shader, "model", &model);
 
-		Mat4_Transform(&model, -0.0f, -0.5f, -4.0f);
+		Mat4_Transform(&model, -0.0f, -0.5f, -2.0f);
 		Shader_SetUniformMat4(&shader, "view", &model);
 
 		Mat4_PerspectiveProjection(
