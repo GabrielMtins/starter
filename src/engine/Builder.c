@@ -13,6 +13,7 @@ typedef struct {
 	size_t max_indices;
 } BuilderContext;
 
+static void Builder_BuildChunk(Mesh *mesh, Memory *stack, const World *world, int x, int y);
 static void Builder_AllocVertices(BuilderContext *context, size_t num_vertices);
 static void Builder_AllocIndices(BuilderContext *context, size_t num_indices);
 
@@ -27,7 +28,17 @@ static void Builder_BuildPlaneX(BuilderContext *context, const Vec3 *position, f
 static void Builder_BuildPlaneY(BuilderContext *context, const Vec3 *position, float texture);
 static void Builder_BuildPlaneZ(BuilderContext *context, const Vec3 *position, float height, float texture);
 
-bool Builder_BuildMesh(Mesh *mesh, Memory *stack, const World *world) {
+void Builder_BuildMesh(Memory *stack, World *world) {
+	for(int i = 0; i < NUM_CHUNKS; i++) {
+		for(int j = 0; j < NUM_CHUNKS; j++) {
+			int index = i + j * NUM_CHUNKS;
+
+			Builder_BuildChunk(&world->chunk_meshes[index], stack, world, i, j);
+		}
+	}
+}
+
+static void Builder_BuildChunk(Mesh *mesh, Memory *stack, const World *world, int x, int y) {
 	size_t used = stack->size / 4;
 	size_t old_state = Memory_SaveState(stack);
 
@@ -40,9 +51,14 @@ bool Builder_BuildMesh(Mesh *mesh, Memory *stack, const World *world) {
 		used / sizeof(unsigned int)
 	};
 
-	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < 4; j++) {
-			Builder_BuildTile(&context, world, i, j);
+	for(int i = 0; i < CHUNK_SIZE; i++) {
+		for(int j = 0; j < CHUNK_SIZE; j++) {
+			Builder_BuildTile(
+					&context,
+					world,
+					x * CHUNK_SIZE + i,
+					y * CHUNK_SIZE + j
+					);
 		}
 	}
 
@@ -54,12 +70,7 @@ bool Builder_BuildMesh(Mesh *mesh, Memory *stack, const World *world) {
 			context.icount
 			);
 
-	printf("%lu\n", used / 1024 / 1024);
-	printf("%lu\n", context.vcount * sizeof(Vertex) / 1024 / 1024);
-
 	Memory_RestoreState(stack, old_state);
-
-	return true;
 }
 
 static void Builder_AllocVertices(BuilderContext *context, size_t num_vertices) {

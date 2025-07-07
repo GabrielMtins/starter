@@ -2,8 +2,11 @@
 #define TYPES_H
 
 #include <stdbool.h>
+#include "renderer/Mesh.h"
 
 #define WORLD_SIZE 256
+#define CHUNK_SIZE 64
+#define NUM_CHUNKS (WORLD_SIZE / CHUNK_SIZE)
 
 typedef struct {
 	float bot_height;
@@ -20,6 +23,7 @@ typedef struct {
 
 typedef struct {
 	Tile tiles[WORLD_SIZE * WORLD_SIZE];
+	Mesh chunk_meshes[NUM_CHUNKS * NUM_CHUNKS];
 } World;
 
 #endif

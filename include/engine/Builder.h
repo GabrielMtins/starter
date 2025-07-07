@@ -7,6 +7,6 @@
 
 #include <stdbool.h>
 
-bool Builder_BuildMesh(Mesh *mesh, Memory *stack, const World *world);
+void Builder_BuildMesh(Memory *stack, World *world);
 
 #endif

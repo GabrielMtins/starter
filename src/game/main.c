@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 	world->tiles[2 + 2 * WORLD_SIZE].top_height = 0.8f;
 	world->tiles[2 + 1 * WORLD_SIZE].top_height = 0.9f;
 
-	Builder_BuildMesh(&mesh, context->stack, world);
+	Builder_BuildMesh(context->stack, world);
 
 
 	Shader_Load(&shader,
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
 		Shader_SetUniformMat4(&shader, "projection", &model);
 
-		Mesh_Render(&mesh, &shader);
+		Mesh_Render(&world->chunk_meshes[0], &shader);
 
 		//Texture_Render(&texture, 0, 0, 0, 0, 160, 120);
 
