@@ -23,7 +23,6 @@ int main(int argc, char **argv) {
 	TextureArray texture_array;
 	Texture texture;
 	Shader shader;
-	Mesh mesh;
 	Mat4 model;
 	World *world;
 
@@ -36,12 +35,13 @@ int main(int argc, char **argv) {
 		for(int j = 0; j < WORLD_SIZE; j++) {
 			Tile tile = {
 				.bot_height = 0.0f,
-				.top_height = 1.0f,
+				.top_height = 2.0f,
 				.bot_texture = 0,
 				.top_texture = 0,
 				.wall_texture = 1,
 				.bot_window_texture = 1,
 				.top_window_texture = 1,
+				.wall_type = WALLTYPE_BLOCK,
 			};
 
 			World_EditTile(world, i, j, &tile);
@@ -54,11 +54,15 @@ int main(int argc, char **argv) {
 	}
 
 	world->tiles[0].has_wall = true;
+	world->tiles[0].wall_type = WALLTYPE_HALFBLOCK_DOWN;
+	world->tiles[0].bot_height = 0.5f;
+	world->tiles[0].top_height = 1.5f;
+	world->tiles[1].has_wall = true;
 	world->tiles[2 + 2 * WORLD_SIZE].bot_height = 0.1f;
 	world->tiles[2 + 1 * WORLD_SIZE].bot_height = 0.2f;
 
-	world->tiles[2 + 2 * WORLD_SIZE].top_height = 0.8f;
-	world->tiles[2 + 1 * WORLD_SIZE].top_height = 0.9f;
+	world->tiles[2 + 2 * WORLD_SIZE].top_height = 2.8f;
+	world->tiles[2 + 1 * WORLD_SIZE].top_height = 2.9f;
 
 	Builder_BuildMesh(context->stack, world);
 
@@ -88,7 +92,7 @@ int main(int argc, char **argv) {
 		Mat4_Mul(&model, &model, &transform);
 		Shader_SetUniformMat4(&shader, "model", &model);
 
-		Mat4_Transform(&model, -0.0f, -0.5f, -2.0f);
+		Mat4_Transform(&model, -0.0f, -1.0, -3.0f);
 		Shader_SetUniformMat4(&shader, "view", &model);
 
 		Mat4_PerspectiveProjection(
