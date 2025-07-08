@@ -9,11 +9,22 @@
 #define NUM_CHUNKS (WORLD_SIZE / CHUNK_SIZE)
 
 typedef enum {
-	WALLTYPE_BLOCK = 0,
+	WALLTYPE_NONE = 0,
+	WALLTYPE_BLOCK,
 	WALLTYPE_HALFBLOCK_LEFT,
 	WALLTYPE_HALFBLOCK_RIGHT,
 	WALLTYPE_HALFBLOCK_UP,
 	WALLTYPE_HALFBLOCK_DOWN,
+
+	WALLTYPE_HALFBLOCK_MIDDLE,
+
+
+	WALLTYPE_DIAGONAL_DOWNLEFT,
+	WALLTYPE_DIAGONAL_DOWNRIGHT,
+	WALLTYPE_DIAGONAL_UPLEFT,
+	WALLTYPE_DIAGONAL_UPRIGHT,
+
+	WALLTYPE_NUMTYPES
 } WallType;
 
 typedef struct {
@@ -25,7 +36,6 @@ typedef struct {
 	int top_window_texture;
 	int top_texture;
 
-	bool has_wall;
 	int wall_texture;
 
 	WallType wall_type;

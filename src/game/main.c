@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 				.wall_texture = 1,
 				.bot_window_texture = 1,
 				.top_window_texture = 1,
-				.wall_type = WALLTYPE_BLOCK,
+				.wall_type = WALLTYPE_NONE,
 			};
 
 			World_EditTile(world, i, j, &tile);
@@ -53,13 +53,12 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	world->tiles[0].has_wall = true;
 	world->tiles[0].wall_type = WALLTYPE_HALFBLOCK_DOWN;
 	world->tiles[0].bot_height = 0.5f;
 	world->tiles[0].top_height = 1.5f;
-	world->tiles[1].has_wall = true;
 	world->tiles[2 + 2 * WORLD_SIZE].bot_height = 0.1f;
 	world->tiles[2 + 1 * WORLD_SIZE].bot_height = 0.2f;
+	world->tiles[2 + 1 * WORLD_SIZE].wall_type = WALLTYPE_HALFBLOCK_MIDDLE;
 
 	world->tiles[2 + 2 * WORLD_SIZE].top_height = 2.8f;
 	world->tiles[2 + 1 * WORLD_SIZE].top_height = 2.9f;

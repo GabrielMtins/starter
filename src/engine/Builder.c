@@ -13,6 +13,12 @@ typedef struct {
 	size_t max_indices;
 } BuilderContext;
 
+typedef struct BuilderRule {
+	void (*buildwall)(BuilderContext *, const World *, int, int, const struct BuilderRule *);
+	Vec3 offset;
+	Vec3 size;
+} BuilderRule;
+
 static void Builder_BuildChunk(Mesh *mesh, Memory *stack, const World *world, int x, int y);
 static void Builder_AllocVertices(BuilderContext *context, size_t num_vertices);
 static void Builder_AllocIndices(BuilderContext *context, size_t num_indices);
@@ -21,8 +27,7 @@ static void Builder_BuildTileX(BuilderContext *context, const World *world, int 
 static void Builder_BuildTileY(BuilderContext *context, const World *world, int i, int j);
 static void Builder_BuildTileZ(BuilderContext *context, const World *world, int i, int j);
 
-static void Builder_BuildTileWallGenericBlock(BuilderContext *context, const World *world, int i, int j, const Vec3 *offset, const Vec3 *size);
-static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j);
+static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule);
 static void Builder_BuildTileWall(BuilderContext *context, const World *world, int i, int j);
 
 static void Builder_BuildTile(BuilderContext *context, const World *world, int i, int j);
@@ -31,6 +36,15 @@ static void Builder_BuildPlane(BuilderContext *context, const Vec3 *position, co
 static void Builder_BuildPlaneX(BuilderContext *context, const Vec3 *position, float height, float texture);
 static void Builder_BuildPlaneY(BuilderContext *context, const Vec3 *position, float texture);
 static void Builder_BuildPlaneZ(BuilderContext *context, const Vec3 *position, float height, float texture);
+
+static const BuilderRule general_builder_rules[WALLTYPE_NUMTYPES] = {
+	[WALLTYPE_BLOCK] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.0f, 0.0f, 0.0f}, .size = {1.0f, 0.0f, 1.0f} },
+	[WALLTYPE_HALFBLOCK_DOWN] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.0f, 0.0f, 0.0f}, .size = {1.0f, 0.0f, 0.5f} },
+	[WALLTYPE_HALFBLOCK_UP] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.0f, 0.0f, 0.5f}, .size = {1.0f, 0.0f, 0.5f} },
+	[WALLTYPE_HALFBLOCK_LEFT] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.0f, 0.0f, 0.0f}, .size = {0.5f, 0.0f, 1.0f} },
+	[WALLTYPE_HALFBLOCK_RIGHT] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.5f, 0.0f, 0.0f}, .size = {0.5f, 0.0f, 1.0f} },
+	[WALLTYPE_HALFBLOCK_MIDDLE] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.25, 0.0f, 0.25f}, .size = {0.5f, 0.0f, 0.5f} },
+};
 
 void Builder_BuildMesh(Memory *stack, World *world) {
 	for(int i = 0; i < NUM_CHUNKS; i++) {
@@ -185,11 +199,15 @@ static void Builder_BuildTileZ(BuilderContext *context, const World *world, int 
 	}
 }
 
-static void Builder_BuildTileWallGenericBlock(BuilderContext *context, const World *world, int i, int j, const Vec3 *offset, const Vec3 *size) {
+static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule) {
+	const Vec3 *offset, *size;
 	const Tile *tile = World_GetTile(world, i, j);
 	float wall_diff;
 	Vec3 position, add;
 	float start_x, start_z;
+
+	offset = &builder_rule->offset;
+	size = &builder_rule->size;
 
 	start_x = (float) i + offset->x;
 	start_z = (float) j + offset->z;
@@ -212,45 +230,16 @@ static void Builder_BuildTileWallGenericBlock(BuilderContext *context, const Wor
 	Builder_BuildPlane(context, &position, &add, tile->wall_texture);
 }
 
-static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j) {
+static void Builder_BuildTileWall(BuilderContext *context, const World *world, int i, int j) {
 	const Tile *tile = World_GetTile(world, i, j);
-	Vec3 offset, size;
+	const BuilderRule *builder_rule;
 
-	if(!tile->has_wall)
+	if(tile->wall_type == WALLTYPE_NONE)
 		return;
 
-	switch(tile->wall_type) {
-		case WALLTYPE_BLOCK:
-			offset = (Vec3) {0.0f, 0.0f, 0.0f};
-			size = (Vec3) {1.0f, 0.0f, 1.0f};
-			break;
+	builder_rule = &general_builder_rules[tile->wall_type];
 
-		case WALLTYPE_HALFBLOCK_DOWN:
-			offset = (Vec3) {0.0f, 0.0f, 0.0f};
-			size = (Vec3) {1.0f, 0.0f, 0.5f};
-			break;
-
-		case WALLTYPE_HALFBLOCK_UP:
-			offset = (Vec3) {0.0f, 0.0f, 0.5f};
-			size = (Vec3) {1.0f, 0.0f, 0.5f};
-			break;
-
-		case WALLTYPE_HALFBLOCK_LEFT:
-			offset = (Vec3) {0.0f, 0.0f, 0.0f};
-			size = (Vec3) {0.5f, 0.0f, 1.0f};
-			break;
-
-		case WALLTYPE_HALFBLOCK_RIGHT:
-			offset = (Vec3) {0.5f, 0.0f, 0.0f};
-			size = (Vec3) {0.5f, 0.0f, 1.0f};
-			break;
-	}
-
-	Builder_BuildTileWallGenericBlock(context, world, i, j, &offset, &size);
-}
-
-static void Builder_BuildTileWall(BuilderContext *context, const World *world, int i, int j) {
-	Builder_BuildTileWallBlock(context, world, i, j);
+	builder_rule->buildwall(context, world, i, j, builder_rule);
 }
 
 static void Builder_BuildTile(BuilderContext *context, const World *world, int i, int j) {
