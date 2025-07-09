@@ -50,6 +50,9 @@ static const BuilderRule general_builder_rules[WALLTYPE_NUMTYPES] = {
 	[WALLTYPE_HALFBLOCK_RIGHT] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.5f, 0.0f, 0.0f}, .size = {0.5f, 0.0f, 1.0f} },
 	[WALLTYPE_HALFBLOCK_MIDDLE] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.25, 0.0f, 0.25f}, .size = {0.5f, 0.0f, 0.5f} },
 	[WALLTYPE_DIAGONAL_DOWNLEFT] = { .buildwall = Builder_BuildTileWallDiagonal, .diagonal_wall_flag = 0, .diagonal_down_to_top = true },
+	[WALLTYPE_DIAGONAL_DOWNRIGHT] = { .buildwall = Builder_BuildTileWallDiagonal, .diagonal_wall_flag = 1, .diagonal_down_to_top = false },
+	[WALLTYPE_DIAGONAL_UPLEFT] = { .buildwall = Builder_BuildTileWallDiagonal, .diagonal_wall_flag = 2, .diagonal_down_to_top = false },
+	[WALLTYPE_DIAGONAL_UPRIGHT] = { .buildwall = Builder_BuildTileWallDiagonal, .diagonal_wall_flag = 3, .diagonal_down_to_top = true },
 };
 
 void Builder_BuildMesh(Memory *stack, World *world) {
@@ -220,8 +223,14 @@ static void Builder_BuildTileWallDiagonal(BuilderContext *context, const World *
 	position = (Vec3) { i, tile->bot_height, j + add_z };
 	Builder_BuildPlaneZ(context, &position, height, tile->wall_texture);
 
-	position = (Vec3) { i + 1.0f, tile->bot_height, j + add_z };
-	add = (Vec3) { -1.0f, height, 1.0f };
+	if(builder_rule->diagonal_down_to_top) {
+		position = (Vec3) { i + 1.0f, tile->bot_height, j };
+		add = (Vec3) { -1.0f, height, 1.0f };
+	}
+	else {
+		position = (Vec3) { i, tile->bot_height, j };
+		add = (Vec3) { 1.0f, height, 1.0f };
+	}
 	Builder_BuildPlaneDiagonal(context, &position, &add, tile->wall_texture);
 }
 
@@ -289,7 +298,7 @@ static void Builder_BuildPlaneDiagonal(BuilderContext *context, const Vec3 *posi
 		add_z = (i & 1) ? add->z : 0.0f;
 
 		u = (i & 1) ? 1.0f : 0.0f;
-		v = (i & 2) ? 1.0f : 0.0f;
+		v = (i & 2) ? add->y : 0.0f;
 
 		Vertex_CreateSimple(
 				vertex,
