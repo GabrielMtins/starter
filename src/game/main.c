@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	world->tiles[0].wall_type = WALLTYPE_HALFBLOCK_DOWN;
+	world->tiles[0].wall_type = WALLTYPE_DIAGONAL_DOWNLEFT;
 	world->tiles[0].bot_height = 0.5f;
 	world->tiles[0].top_height = 1.5f;
 	world->tiles[2 + 2 * WORLD_SIZE].bot_height = 0.1f;

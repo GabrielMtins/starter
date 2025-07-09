@@ -17,6 +17,9 @@ typedef struct BuilderRule {
 	void (*buildwall)(BuilderContext *, const World *, int, int, const struct BuilderRule *);
 	Vec3 offset;
 	Vec3 size;
+
+	int diagonal_wall_flag;
+	bool diagonal_down_to_top;
 } BuilderRule;
 
 static void Builder_BuildChunk(Mesh *mesh, Memory *stack, const World *world, int x, int y);
@@ -27,11 +30,13 @@ static void Builder_BuildTileX(BuilderContext *context, const World *world, int 
 static void Builder_BuildTileY(BuilderContext *context, const World *world, int i, int j);
 static void Builder_BuildTileZ(BuilderContext *context, const World *world, int i, int j);
 
+static void Builder_BuildTileWallDiagonal(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule);
 static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule);
 static void Builder_BuildTileWall(BuilderContext *context, const World *world, int i, int j);
 
 static void Builder_BuildTile(BuilderContext *context, const World *world, int i, int j);
 
+static void Builder_BuildPlaneDiagonal(BuilderContext *context, const Vec3 *position, const Vec3 *add, float texture);
 static void Builder_BuildPlane(BuilderContext *context, const Vec3 *position, const Vec3 *add, float texture);
 static void Builder_BuildPlaneX(BuilderContext *context, const Vec3 *position, float height, float texture);
 static void Builder_BuildPlaneY(BuilderContext *context, const Vec3 *position, float texture);
@@ -44,6 +49,7 @@ static const BuilderRule general_builder_rules[WALLTYPE_NUMTYPES] = {
 	[WALLTYPE_HALFBLOCK_LEFT] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.0f, 0.0f, 0.0f}, .size = {0.5f, 0.0f, 1.0f} },
 	[WALLTYPE_HALFBLOCK_RIGHT] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.5f, 0.0f, 0.0f}, .size = {0.5f, 0.0f, 1.0f} },
 	[WALLTYPE_HALFBLOCK_MIDDLE] = { .buildwall = Builder_BuildTileWallBlock, .offset = {0.25, 0.0f, 0.25f}, .size = {0.5f, 0.0f, 0.5f} },
+	[WALLTYPE_DIAGONAL_DOWNLEFT] = { .buildwall = Builder_BuildTileWallDiagonal, .diagonal_wall_flag = 0, .diagonal_down_to_top = true },
 };
 
 void Builder_BuildMesh(Memory *stack, World *world) {
@@ -199,6 +205,26 @@ static void Builder_BuildTileZ(BuilderContext *context, const World *world, int 
 	}
 }
 
+static void Builder_BuildTileWallDiagonal(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule) {
+	const Tile *tile = World_GetTile(world, i, j);
+	Vec3 position, add;
+	float add_x, add_z, height;
+
+	add_x = builder_rule->diagonal_wall_flag & 1 ? 1.0f : 0.0f;
+	add_z = builder_rule->diagonal_wall_flag & 2 ? 1.0f : 0.0f;
+	height = tile->top_height - tile->bot_height;
+
+	position = (Vec3) { i + add_x, tile->bot_height, j };
+	Builder_BuildPlaneX(context, &position, height, tile->wall_texture);
+
+	position = (Vec3) { i, tile->bot_height, j + add_z };
+	Builder_BuildPlaneZ(context, &position, height, tile->wall_texture);
+
+	position = (Vec3) { i + 1.0f, tile->bot_height, j + add_z };
+	add = (Vec3) { -1.0f, height, 1.0f };
+	Builder_BuildPlaneDiagonal(context, &position, &add, tile->wall_texture);
+}
+
 static void Builder_BuildTileWallBlock(BuilderContext *context, const World *world, int i, int j, const BuilderRule *builder_rule) {
 	const Vec3 *offset, *size;
 	const Tile *tile = World_GetTile(world, i, j);
@@ -247,6 +273,45 @@ static void Builder_BuildTile(BuilderContext *context, const World *world, int i
 	Builder_BuildTileY(context, world, i, j);
 	Builder_BuildTileZ(context, world, i, j);
 	Builder_BuildTileWall(context, world, i, j);
+}
+
+static void Builder_BuildPlaneDiagonal(BuilderContext *context, const Vec3 *position, const Vec3 *add, float texture) {
+	Vertex *vertex;
+	float add_x, add_y, add_z, u, v;
+
+	Builder_AllocVertices(context, 4);
+
+	for(int i = 0; i < 4; i++) {
+		vertex = &context->vertices[context->vcount - i - 1];
+
+		add_x = (i & 1) ? add->x : 0.0f;
+		add_y = (i & 2) ? add->y : 0.0f;
+		add_z = (i & 1) ? add->z : 0.0f;
+
+		u = (i & 1) ? 1.0f : 0.0f;
+		v = (i & 2) ? 1.0f : 0.0f;
+
+		Vertex_CreateSimple(
+				vertex,
+				position->x + add_x,
+				position->y + add_y,
+				position->z + add_z,
+				u,
+				v
+				);
+
+		vertex->layer_index = texture;
+	}
+
+	Builder_AllocIndices(context, 6);
+
+	context->indices[context->icount - 1] = context->vcount - 1;
+	context->indices[context->icount - 2] = context->vcount - 2;
+	context->indices[context->icount - 3] = context->vcount - 3;
+
+	context->indices[context->icount - 4] = context->vcount - 4;
+	context->indices[context->icount - 5] = context->vcount - 2;
+	context->indices[context->icount - 6] = context->vcount - 3;
 }
 
 static void Builder_BuildPlane(BuilderContext *context, const Vec3 *position, const Vec3 *add, float texture) {
