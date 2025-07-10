@@ -10,7 +10,10 @@
 #define CHUNK_SIZE 64
 #define NUM_CHUNKS (WORLD_SIZE / CHUNK_SIZE)
 
+#define MAX_ENTITIES 256
+
 typedef struct Game Game;
+typedef struct Scene Scene;
 
 typedef enum {
 	WALLTYPE_NONE = 0,
@@ -59,8 +62,19 @@ typedef struct {
 	Shader shader;
 } World;
 
+typedef struct {
+	Vec3 position;
+	Vec3 size;
+} Entity;
+
 struct Game {
 	Context *context;
+	World world;
+
+	Entity entities[MAX_ENTITIES];
+
+	Mat4 view;
+	Mat4 projection;
 };
 
 #endif

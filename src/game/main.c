@@ -20,7 +20,6 @@ int main(int argc, char **argv) {
 
 	Memory memory, stack;
 	Context *context;
-	Texture texture;
 	Mat4 view, projection;
 	World *world;
 
@@ -53,8 +52,6 @@ int main(int argc, char **argv) {
 			Memory_ReadFileAsString(&memory, "res/shaders/octree.fs")
 			);
 	Memory_Free(context->stack);
-
-	Texture_Load(&texture, "floor.png", 64, 64);
 
 	TextureArray_Create(&world->tile_textures, 64, 64);
 	TextureArray_Load(&world->tile_textures, "floor.png");
