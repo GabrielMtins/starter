@@ -59,8 +59,7 @@ void Builder_BuildMesh(Memory *stack, World *world) {
 	for(int i = 0; i < NUM_CHUNKS; i++) {
 		for(int j = 0; j < NUM_CHUNKS; j++) {
 			int index = i + j * NUM_CHUNKS;
-
-			Builder_BuildChunk(&world->chunk_meshes[index], stack, world, i, j);
+			Builder_BuildChunk(&world->chunks[index].mesh, stack, world, i, j);
 		}
 	}
 }

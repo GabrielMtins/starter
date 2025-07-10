@@ -20,10 +20,8 @@ int main(int argc, char **argv) {
 
 	Memory memory, stack;
 	Context *context;
-	TextureArray texture_array;
 	Texture texture;
-	Shader shader;
-	Mat4 model;
+	Mat4 view, projection;
 	World *world;
 
 	memory = Memory_Create(malloc(BASE_MEMORY), BASE_MEMORY);
@@ -45,44 +43,12 @@ int main(int argc, char **argv) {
 			};
 
 			World_EditTile(world, i, j, &tile);
-			/*
-			world->tiles[i + j * WORLD_SIZE].bot_height = 0.0f;
-			world->tiles[i + j * WORLD_SIZE].top_height = 1.0f;
-			world->tiles[i + j * WORLD_SIZE].bot_texture = (i + j) % 2;
-			*/
 		}
 	}
-
-	for(int i = 0; i < 7; i++) {
-		for(int j = 0; j < 7; j++) {
-			if(i == 0 || i == 6 || j == 0 || j == 6) {
-				world->tiles[i + j * WORLD_SIZE].wall_type = WALLTYPE_BLOCK;
-			}
-		}
-	}
-	world->tiles[1 + 1 * WORLD_SIZE].wall_type = WALLTYPE_DIAGONAL_DOWNLEFT;
-	world->tiles[5 + 1 * WORLD_SIZE].wall_type = WALLTYPE_DIAGONAL_DOWNRIGHT;
-	world->tiles[1 + 5 * WORLD_SIZE].wall_type = WALLTYPE_DIAGONAL_UPLEFT;
-	world->tiles[5 + 5 * WORLD_SIZE].wall_type = WALLTYPE_DIAGONAL_UPRIGHT;
-	/*
-	world->tiles[0].bot_height = 0.5f;
-	world->tiles[0].top_height = 1.5f;
-	*/
-
-
-	/*
-	world->tiles[2 + 2 * WORLD_SIZE].bot_height = 0.1f;
-	world->tiles[2 + 1 * WORLD_SIZE].bot_height = 0.2f;
-	world->tiles[2 + 1 * WORLD_SIZE].wall_type = WALLTYPE_HALFBLOCK_MIDDLE;
-
-	world->tiles[2 + 2 * WORLD_SIZE].top_height = 2.8f;
-	world->tiles[2 + 1 * WORLD_SIZE].top_height = 2.9f;
-	*/
 
 	Builder_BuildMesh(context->stack, world);
 
-
-	Shader_Load(&shader,
+	Shader_Load(&world->shader,
 			Memory_ReadFileAsString(&memory, "res/shaders/octree.vs"),
 			Memory_ReadFileAsString(&memory, "res/shaders/octree.fs")
 			);
@@ -90,38 +56,30 @@ int main(int argc, char **argv) {
 
 	Texture_Load(&texture, "floor.png", 64, 64);
 
-	TextureArray_Create(&texture_array, 64, 64);
-	TextureArray_Load(&texture_array, "floor.png");
-	TextureArray_Load(&texture_array, "wall.png");
+	TextureArray_Create(&world->tile_textures, 64, 64);
+	TextureArray_Load(&world->tile_textures, "floor.png");
+	TextureArray_Load(&world->tile_textures, "wall.png");
 
 	Context_SetFps(context, 165);
 
 	while(!context->quit) {
+		Mat4 rotation;
 		Context_PollEvent(context);
 		Render_Clear(context, 0x00, 0x00, 0x00, 0xff);
 
-		Mat4_Identity(&model);
-		Mat4 transform;
-		Mat4_Transform(&transform, -0.0, 0.0f, -0.0f);
-		Mat4_Mul(&model, &model, &transform);
-		Shader_SetUniformMat4(&shader, "model", &model);
-
-		Mat4_Transform(&model, -4.0f, -1.0, -4.0f);
-		Mat4_RotateY(&transform, (float) (context->tick) * 0.0005f * (-1.0f));
-		Mat4_Mul(&model, &transform, &model);
-		Shader_SetUniformMat4(&shader, "view", &model);
+		Mat4_Transform(&view, -4.0f, -0.5f, -4.0f);
+		Mat4_RotateY(&rotation, (float) (context->tick) * 0.0005f * (-1.0f));
+		Mat4_Mul(&view, &rotation, &view);
 
 		Mat4_PerspectiveProjection(
-				&model,
+				&projection,
 				16.0f / 9.0f,
 				3.14 / 4,
 				100.0f,
 				0.2f
 				);
 
-		Shader_SetUniformMat4(&shader, "projection", &model);
-
-		Mesh_Render(&world->chunk_meshes[0], &shader);
+		World_Render(world, &view, &projection);
 
 		//Texture_Render(&texture, 0, 0, 0, 0, 160, 120);
 

@@ -28,7 +28,7 @@ bool TextureArray_Create(TextureArray *texture_array, int w, int h);
 
 bool TextureArray_Load(TextureArray *texture_array, const char *filename);
 
-bool TextureArray_Use(TextureArray *texture_array, int unit);
+bool TextureArray_Use(const TextureArray *texture_array, int unit);
 
 bool Texture_Load(Texture *texture, const char *filename, int cell_w, int cell_h);
 

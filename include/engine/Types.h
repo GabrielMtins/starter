@@ -3,10 +3,14 @@
 
 #include <stdbool.h>
 #include "renderer/Mesh.h"
+#include "renderer/Texture.h"
+#include "base/Context.h"
 
 #define WORLD_SIZE 256
 #define CHUNK_SIZE 64
 #define NUM_CHUNKS (WORLD_SIZE / CHUNK_SIZE)
+
+typedef struct Game Game;
 
 typedef enum {
 	WALLTYPE_NONE = 0,
@@ -41,9 +45,22 @@ typedef struct {
 	WallType wall_type;
 } Tile;
 
+typedef struct { 
+	Tile tiles[CHUNK_SIZE * CHUNK_SIZE];
+	Mesh mesh;
+	bool dirty;
+} Chunk;
+
 typedef struct {
+	Chunk chunks[NUM_CHUNKS * NUM_CHUNKS];
 	Tile tiles[WORLD_SIZE * WORLD_SIZE];
 	Mesh chunk_meshes[NUM_CHUNKS * NUM_CHUNKS];
+	TextureArray tile_textures;
+	Shader shader;
 } World;
+
+struct Game {
+	Context *context;
+};
 
 #endif
