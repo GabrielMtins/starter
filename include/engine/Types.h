@@ -13,7 +13,7 @@
 #define MAX_ENTITIES 256
 
 typedef struct Game Game;
-typedef struct Scene Scene;
+typedef struct Entity Entity;
 
 typedef enum {
 	WALLTYPE_NONE = 0,
@@ -62,10 +62,20 @@ typedef struct {
 	Shader shader;
 } World;
 
-typedef struct {
+struct Entity {
 	Vec3 position;
+	Vec3 velocity;
+	Vec3 direction;
 	Vec3 size;
-} Entity;
+
+	Entity *target;
+
+	Texture *texture;
+	uint32_t next_tick;
+
+	void (*update)(Entity *, Game *, float dt);
+	void (*think)(Entity *, Game *);
+};
 
 struct Game {
 	Context *context;
