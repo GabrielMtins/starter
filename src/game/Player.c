@@ -5,7 +5,8 @@ static void Player_Update(Entity *entity, Game *game, float dt);
 
 void Player_Create(Entity *entity) {
 	entity->update = Player_Update;
-	entity->position = (Vec3) {3.0f, 0.0f, 3.0f};
+	entity->position = (Vec3) {3.0f, 0.1f, 3.0f};
+	entity->size = (Vec3) {0.8f, 0.8f, 0.8f};
 }
 
 static void Player_Update(Entity *entity, Game *game, float dt) {
@@ -46,9 +47,9 @@ static void Player_Update(Entity *entity, Game *game, float dt) {
 
 	Mat4_Transform(
 			&game->view,
-			-entity->position.x,
+			-entity->position.x - entity->size.x / 2,
 			-entity->position.y - 0.5f,
-			-entity->position.z
+			-entity->position.z - entity->size.z / 2
 			);
 
 	Mat4_Mul(

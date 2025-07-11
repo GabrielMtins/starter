@@ -71,9 +71,13 @@ struct Entity {
 	Vec3 angle;
 
 	Entity *target;
+	Entity *child;
 
 	Texture *texture;
 	uint32_t next_think;
+
+	uint32_t collision_layer;
+	uint32_t collision_mask;
 
 	bool unused;
 

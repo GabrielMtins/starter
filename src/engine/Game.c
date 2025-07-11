@@ -32,6 +32,21 @@ Game * Game_Create(Context *context) {
 		}
 	}
 
+	{
+		Tile tile = {
+			.bot_height = 0.0f,
+			.top_height = 2.0f,
+			.bot_texture = 0,
+			.top_texture = 0,
+			.wall_texture = 1,
+			.bot_window_texture = 1,
+			.top_window_texture = 1,
+			.wall_type = WALLTYPE_HALFBLOCK_MIDDLE,
+		};
+	
+		World_EditTile(&game->world, 5, 5, &tile);
+	}
+
 	Builder_BuildMesh(context->stack, &game->world);
 
 	Shader_Load(&game->world.shader,

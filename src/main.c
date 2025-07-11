@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
 	Game_Run(game);
 
-	printf("%lu KB", memory.top / 1024 );
+	printf("%lu KB\n", memory.top / 1024 );
 
 	Context_Destroy(context);
 	free(memory.block);

@@ -13,4 +13,6 @@ bool World_EditTile(World *world, int i, int j, const Tile *tile);
 
 void World_Render(const World *world, const Mat4 *view, const Mat4 *projection);
 
+bool World_CheckCollisionBox(const World *world, const Vec3 *position, const Vec3 *size);
+
 #endif
