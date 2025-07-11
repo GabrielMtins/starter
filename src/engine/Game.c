@@ -19,7 +19,7 @@ Game * Game_Create(Context *context) {
 		for(int j = 0; j < WORLD_SIZE; j++) {
 			Tile tile = {
 				.bot_height = 0.0f,
-				.top_height = 2.0f,
+				.top_height = 4.0f,
 				.bot_texture = 0,
 				.top_texture = 0,
 				.wall_texture = 1,
@@ -32,7 +32,7 @@ Game * Game_Create(Context *context) {
 		}
 	}
 
-	for(int i = 0; i < 4; i++){
+	for(int i = 1; i <= 4; i++){
 		Tile tile = {
 			.bot_height = (float) i / 8.0f,
 			.top_height = 2.0f,
@@ -46,6 +46,8 @@ Game * Game_Create(Context *context) {
 	
 		World_EditTile(&game->world, 5 + i, 5, &tile);
 	}
+
+	game->world.collision_layer = 1;
 
 	Builder_BuildMesh(context->stack, &game->world);
 

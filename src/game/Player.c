@@ -7,6 +7,8 @@ void Player_Create(Entity *entity) {
 	entity->update = Player_Update;
 	entity->position = (Vec3) {3.0f, 0.1f, 3.0f};
 	entity->size = (Vec3) {0.8f, 0.8f, 0.8f};
+
+	entity->collision_mask = 1;
 }
 
 static void Player_Update(Entity *entity, Game *game, float dt) {
@@ -32,13 +34,21 @@ static void Player_Update(Entity *entity, Game *game, float dt) {
 		actual_velocity = -running_velocity;
 	}
 
+	if(Context_GetKey(context, INPUT_JUMP) && entity->on_floor) {
+		entity->velocity.y = 5.0f;
+	}
+
 	entity->direction = (Vec3) {
 		sin(entity->angle.y),
 		0.0f,
 		-cos(entity->angle.y)
 	};
 
+	float old = entity->velocity.y;
+
 	Vec3_Mul(&entity->velocity, &entity->direction, actual_velocity);
+
+	entity->velocity.y = old - 10.0f * dt;
 
 	Mat4_RotateY(
 			&rotation,

@@ -15,8 +15,11 @@ void Entity_Reset(Entity *entity) {
 	entity->size = VEC3_ZERO;
 
 	entity->unused = true;
+	entity->health = 100;
 
 	entity->texture = NULL;
+	entity->collision_layer = 0;
+	entity->collision_mask = 0;
 }
 
 void Entity_Update(Entity *entity, Game *game, float dt) {
@@ -28,10 +31,17 @@ void Entity_Update(Entity *entity, Game *game, float dt) {
 		entity->think(entity, game);
 	}
 
+	if(entity->health < 0) {
+		entity->unused = true;
+	}
+
 	Entity_HandleUpdatePosition(entity, game, dt);
 }
 
 static bool Entity_CheckCollisionWorld(const Entity *entity, const World *world) {
+	if(!(entity->collision_mask & world->collision_layer))
+		return false;
+
 	return World_CheckCollisionBox(world, &entity->position, &entity->size);
 }
 
@@ -40,6 +50,9 @@ static void Entity_HandleFloorTolerance(Entity *entity, const World *world) {
 	const Tile *tile;
 
 	float max_floor_height = -999.0f;
+
+	if(!(entity->collision_mask & world->collision_layer))
+		return;
 
 	min_x = floorf(entity->position.x);
 	min_z = floorf(entity->position.z);
@@ -58,16 +71,16 @@ static void Entity_HandleFloorTolerance(Entity *entity, const World *world) {
 		}
 	}
 
-	if(fabsf(entity->position.y - max_floor_height) < FLOOR_TOLERANCE && max_floor_height > entity->position.y) {
-		printf("%f %f\n", entity->position.y, max_floor_height);
+	if(fabsf(entity->position.y - max_floor_height) < FLOOR_TOLERANCE && max_floor_height > entity->position.y && entity->velocity.y <= 0.0f) {
 		entity->position.y = max_floor_height + 0.01f;
-		printf("%f\n", entity->position.y);
 	}
 }
 
 static void Entity_HandleUpdatePosition(Entity *entity, const Game *game, float dt) {
 	Vec3 original;
 	const World *world;
+
+	entity->on_floor = false;
 
 	world = &game->world;
 
@@ -80,13 +93,17 @@ static void Entity_HandleUpdatePosition(Entity *entity, const Game *game, float 
 		entity->position.x = original.x;
 	}
 
-	/*
 	entity->position.y += entity->velocity.y * dt;
 
 	if(Entity_CheckCollisionWorld(entity, world)) {
 		entity->position.y = original.y;
+
+		if(entity->velocity.y < 0.0f) {
+			entity->on_floor = true;
+		}
+
+		entity->velocity.y = 0.0f;
 	}
-	*/
 
 	entity->position.z += entity->velocity.z * dt;
 	Entity_HandleFloorTolerance(entity, world);

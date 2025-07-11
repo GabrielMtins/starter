@@ -10,6 +10,7 @@
 #define CHUNK_SIZE 64
 #define NUM_CHUNKS (WORLD_SIZE / CHUNK_SIZE)
 
+#define MAX_TAGS 64
 #define MAX_ENTITIES 256
 
 typedef struct Game Game;
@@ -60,6 +61,8 @@ typedef struct {
 	Mesh chunk_meshes[NUM_CHUNKS * NUM_CHUNKS];
 	TextureArray tile_textures;
 	Shader shader;
+
+	uint32_t collision_layer;
 } World;
 
 struct Entity {
@@ -69,6 +72,8 @@ struct Entity {
 	Vec3 size;
 
 	Vec3 angle;
+
+	int health;
 
 	Entity *target;
 	Entity *child;
@@ -80,6 +85,7 @@ struct Entity {
 	uint32_t collision_mask;
 
 	bool unused;
+	bool on_floor;
 
 	void (*update)(Entity *, Game *, float dt);
 	void (*think)(Entity *, Game *);
@@ -93,6 +99,8 @@ struct Game {
 
 	Mat4 view;
 	Mat4 projection;
+
+	bool tags[MAX_TAGS];
 };
 
 #endif
