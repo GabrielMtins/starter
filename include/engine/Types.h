@@ -68,10 +68,14 @@ struct Entity {
 	Vec3 direction;
 	Vec3 size;
 
+	Vec3 angle;
+
 	Entity *target;
 
 	Texture *texture;
-	uint32_t next_tick;
+	uint32_t next_think;
+
+	bool unused;
 
 	void (*update)(Entity *, Game *, float dt);
 	void (*think)(Entity *, Game *);

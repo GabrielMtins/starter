@@ -2,7 +2,9 @@
 #include "renderer/Render.h"
 #include "engine/Builder.h"
 #include "engine/World.h"
+#include "engine/Entity.h"
 
+static void Game_Update(Game *game);
 static void Game_Render(Game *game);
 static void Game_Loop(Game *game);
 
@@ -54,12 +56,41 @@ Game * Game_Create(Context *context) {
 			0.2f
 			);
 
+	for(int i = 0; i < MAX_ENTITIES; i++)
+		Entity_Reset(&game->entities[i]);
+
 	return game;
 }
 
 void Game_Run(Game *game) {
 	while(!game->context->quit) {
 		Game_Loop(game);
+	}
+}
+
+Entity * Game_AddEntity(Game *game) {
+	Entity *entity;
+
+	for(int i = 0; i < MAX_ENTITIES; i++) {
+		entity = &game->entities[i];
+
+		if(entity->unused) {
+			Entity_Reset(entity);
+			entity->unused = false;
+			return entity;
+		}
+	}
+
+	return NULL;
+}
+
+static void Game_Update(Game *game) {
+	for(int i = 0; i < MAX_ENTITIES; i++) {
+		Entity *entity = &game->entities[i];
+
+		if(!entity->unused) {
+			Entity_Update(entity, game, game->context->dt);
+		}
 	}
 }
 
@@ -72,6 +103,7 @@ static void Game_Render(Game *game) {
 static void Game_Loop(Game *game) {
 	Context_PollEvent(game->context);
 
+	Game_Update(game);
 	Game_Render(game);
 
 	Context_DelayFPS(game->context);

@@ -14,6 +14,8 @@
 
 #include "engine/Game.h"
 
+#include "game/Player.h"
+
 #define BASE_MEMORY ( 16 * 1024 * 1024 )
 #define STACK_MEMORY ( 8 * 1024 * 1024 )
 
@@ -30,6 +32,8 @@ int main(int argc, char **argv) {
 
 	context = Context_Create("oi", 1280, 720, &memory, &stack);
 	game = Game_Create(context);
+
+	Player_Create(Game_AddEntity(game));
 
 	Game_Run(game);
 

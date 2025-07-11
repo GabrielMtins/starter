@@ -7,4 +7,6 @@ Game * Game_Create(Context *context);
 
 void Game_Run(Game *game);
 
+Entity * Game_AddEntity(Game *game);
+
 #endif
