@@ -32,19 +32,19 @@ Game * Game_Create(Context *context) {
 		}
 	}
 
-	{
+	for(int i = 0; i < 4; i++){
 		Tile tile = {
-			.bot_height = 0.0f,
+			.bot_height = (float) i / 8.0f,
 			.top_height = 2.0f,
 			.bot_texture = 0,
 			.top_texture = 0,
 			.wall_texture = 1,
 			.bot_window_texture = 1,
 			.top_window_texture = 1,
-			.wall_type = WALLTYPE_DIAGONAL_UPLEFT,
+			.wall_type = WALLTYPE_NONE,
 		};
 	
-		World_EditTile(&game->world, 5, 5, &tile);
+		World_EditTile(&game->world, 5 + i, 5, &tile);
 	}
 
 	Builder_BuildMesh(context->stack, &game->world);
