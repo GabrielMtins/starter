@@ -110,7 +110,7 @@ static bool World_CheckCollisionCeiling(const World *world, int i, int j, const 
 
 static bool World_CheckCollisionWall(const World *world, int i, int j, const Vec3 *position, const Vec3 *size) {
 	const Tile *tile;
-	Vec3 tile_position, tile_size;
+	Vec3 tile_position, tile_size, normal;
 
 	tile = World_GetTile(world, i, j);
 
@@ -157,6 +157,28 @@ static bool World_CheckCollisionWall(const World *world, int i, int j, const Vec
 			tile_size.x = 0.5f;
 			tile_size.z = 0.5f;
 			return Box_CheckCollision(position, size, &tile_position, &tile_size);
+			break;
+
+		case WALLTYPE_DIAGONAL_DOWNLEFT:
+			tile_position.x += 1.0f;
+			normal = (Vec3) {1.0f, 0.0f, 1.0f};
+			return Box_CheckCollisionSemiSpace(position, size, &tile_position, &normal);
+			break;
+
+		case WALLTYPE_DIAGONAL_DOWNRIGHT:
+			normal = (Vec3) {-1.0f, 0.0f, 1.0f};
+			return Box_CheckCollisionSemiSpace(position, size, &tile_position, &normal);
+			break;
+
+		case WALLTYPE_DIAGONAL_UPLEFT:
+			normal = (Vec3) {1.0f, 0.0f, -1.0f};
+			return Box_CheckCollisionSemiSpace(position, size, &tile_position, &normal);
+			break;
+
+		case WALLTYPE_DIAGONAL_UPRIGHT:
+			tile_position.x += 1.0f;
+			normal = (Vec3) {-1.0f, 0.0f, -1.0f};
+			return Box_CheckCollisionSemiSpace(position, size, &tile_position, &normal);
 			break;
 
 		default:

@@ -41,7 +41,7 @@ Game * Game_Create(Context *context) {
 			.wall_texture = 1,
 			.bot_window_texture = 1,
 			.top_window_texture = 1,
-			.wall_type = WALLTYPE_HALFBLOCK_MIDDLE,
+			.wall_type = WALLTYPE_DIAGONAL_UPLEFT,
 		};
 	
 		World_EditTile(&game->world, 5, 5, &tile);
